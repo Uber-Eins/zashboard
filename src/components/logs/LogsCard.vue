@@ -1,10 +1,10 @@
 <template>
   <div
-    class="scroller-item hover:bg-base-200/40 flex flex-col gap-2 px-3 py-2 text-sm transition-colors"
-    :class="connectionID && 'cursor-pointer'"
-    @click="connectionID && emits('connectionClick', connectionID)"
+    class="scroller-item hover:bg-base-200/40 flex h-16 flex-col gap-2 overflow-hidden px-3 py-2 text-sm transition-colors"
+    :class="connectionReference && 'cursor-pointer'"
+    @click="connectionReference && emits('connectionClick', connectionReference)"
   >
-    <div class="flex items-center gap-2">
+    <div class="flex shrink-0 items-center gap-2">
       <span
         class="text-base-content/40 text-xs tabular-nums"
         :style="{ minWidth: `${(seqWithPadding.length + 1) * 0.62}em` }"
@@ -28,7 +28,10 @@
         />
       </span>
     </div>
-    <div class="w-full leading-relaxed break-words">
+    <div
+      class="w-full min-w-0 truncate leading-relaxed"
+      :title="plainPayload"
+    >
       <HighlightText
         :text="log.payload"
         :filter="logFilter"
@@ -40,26 +43,38 @@
 
 <script setup lang="ts">
 import { can } from '@/assembly/backend'
+import {
+  getLogConnectionID,
+  getMihomoLogConnectionReference,
+  type LogConnectionReference,
+} from '@/assembly/connections'
 import HighlightText from '@/components/common/HighlightText.vue'
 import { useBounceOnVisible } from '@/composables/bouncein'
 import { LOG_LEVEL } from '@/constant'
-import { getLogConnectionID, logFilter } from '@/store/logs'
+import { stripAnsi } from '@/helper/ansi'
+import { logFilter } from '@/store/logs'
 import type { LogWithSeq } from '@/types'
 import { computed } from 'vue'
 
-const props = defineProps<{
-  log: LogWithSeq
-  connectionDetailDisabled?: boolean
-}>()
+const props = defineProps<{ log: LogWithSeq }>()
 
 const emits = defineEmits<{
-  (e: 'connectionClick', connectionID: string): void
+  (e: 'connectionClick', reference: LogConnectionReference): void
 }>()
 
-const connectionID = computed(() => {
-  if (!can('logConnectionDetail') || props.connectionDetailDisabled) return null
+const plainPayload = computed(() => stripAnsi(props.log.payload))
 
-  return getLogConnectionID(props.log.payload)
+const connectionReference = computed(() => {
+  if (can('logConnectionDetail')) {
+    const id = getLogConnectionID(props.log.payload)
+    if (id) return { id }
+  }
+
+  if (can('mitm')) {
+    return getMihomoLogConnectionReference(props.log.payload)
+  }
+
+  return null
 })
 
 const seqWithPadding = computed(() => {

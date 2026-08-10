@@ -219,6 +219,9 @@ const zhTW: LANG_MESSAGE = {
   traffic: '流量',
   sourceAndDestination: '來源與目的',
   rawData: '原始資料',
+  mitmCapture: 'MITM 正文擷取',
+  mitmCaptureTip:
+    '請求與回應 Headers 一律會被記錄。啟用後還會擷取完整 Body，可能增加記憶體與 CPU 用量。這裡只修改執行時狀態，下次載入設定時會恢復設定檔中的值。',
   requestHeaders: '請求 Headers',
   responseHeaders: '回應 Headers',
   body: 'Body',

@@ -219,6 +219,9 @@ const zh: LANG_MESSAGE = {
   traffic: '流量',
   sourceAndDestination: '来源与目的',
   rawData: '原始数据',
+  mitmCapture: 'MITM 正文捕获',
+  mitmCaptureTip:
+    '请求和响应 Headers 始终会被记录。启用后还会捕获完整 Body，可能增加内存和 CPU 占用。这里只修改运行时状态，下次加载配置时会恢复配置中的值。',
   requestHeaders: '请求 Headers',
   responseHeaders: '响应 Headers',
   body: 'Body',

@@ -2,7 +2,8 @@
   <div class="relative size-full overflow-x-hidden">
     <VirtualScroller
       :data="renderLogs"
-      :size="44"
+      :size="65"
+      content-class="[&>div]:h-[65px] [&>div]:overflow-hidden"
     >
       <template v-slot:before>
         <LogsCtrl />
@@ -14,42 +15,24 @@
         />
       </template>
     </VirtualScroller>
-    <DialogWrapper
-      v-model="connectionLogsDialogVisible"
-      no-padding
-      :title="`${t('sameConnectionLogs')} (${connectionLogID})`"
-    >
-      <div class="flex flex-col">
-        <LogsCard
-          v-for="log in connectionLogs"
-          :key="log.seq"
-          :log="log"
-          connection-detail-disabled
-        />
-      </div>
-    </DialogWrapper>
+    <ConnectionDetails />
   </div>
 </template>
 
 <script setup lang="ts">
-import DialogWrapper from '@/components/common/DialogWrapper.vue'
+import { resolveLogConnection, type LogConnectionReference } from '@/assembly/connections'
 import VirtualScroller from '@/components/common/VirtualScroller.vue'
+import ConnectionDetails from '@/components/connections/ConnectionDetails.vue'
 import LogsCtrl from '@/components/controls/LogsCtrl.tsx'
 import LogsCard from '@/components/logs/LogsCard.vue'
+import { useConnections } from '@/composables/connections'
 import { toSearchRegex } from '@/helper/search'
-import {
-  getLogConnectionID,
-  logFilter,
-  logFilterEnabled,
-  logFilterRegex,
-  logTypeFilter,
-  logs,
-} from '@/store/logs'
+import { logFilter, logFilterEnabled, logFilterRegex, logTypeFilter, logs } from '@/store/logs'
+import { activeConnections, closedConnections } from '@/store/connections'
 import type { LogWithSeq } from '@/types'
-import { computed, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { computed } from 'vue'
 
-const { t } = useI18n()
+const { handlerInfo } = useConnections()
 
 const renderLogs = computed(() => {
   let renderLogs = logs.value
@@ -85,18 +68,17 @@ const renderLogs = computed(() => {
   return renderLogs
 })
 
-const connectionLogID = ref('')
-const connectionLogsDialogVisible = ref(false)
-const connectionLogs = computed(() => {
-  if (!connectionLogID.value) return []
+const handlerConnectionClick = async (reference: LogConnectionReference) => {
+  const active = [...activeConnections.value].reverse()
+  const closed = [...closedConnections.value].reverse()
+  const candidates = active.concat(closed)
+  const connection = resolveLogConnection(candidates, reference)
+  if (!connection) return
+  const mitmRequest =
+    'url' in reference && reference.url
+      ? { url: reference.url, source: reference.source }
+      : undefined
 
-  return logs.value
-    .filter((log) => getLogConnectionID(log.payload) === connectionLogID.value)
-    .reverse()
-})
-
-const handlerConnectionClick = (connectionID: string) => {
-  connectionLogID.value = connectionID
-  connectionLogsDialogVisible.value = true
+  await handlerInfo(connection, { mitmRequest })
 }
 </script>

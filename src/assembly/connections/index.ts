@@ -7,8 +7,22 @@ import type { ConnectionDisplayOptions, ConnectionsSnapshot } from './accessor'
 import * as clash from './clash'
 import * as singbox from './singbox'
 
-export { subscribeMitmSessionsAPI } from './mitm'
-export type { MitmBody, MitmHeaders, MitmRequest, MitmResponse, MitmSession } from './mitm'
+export { getLogConnectionID, getMihomoLogConnectionReference, resolveLogConnection } from './log'
+export type { LogConnectionReference } from './log'
+export {
+  fetchMitmCaptureAPI,
+  matchesMitmSessionReference,
+  subscribeMitmSessionsAPI,
+  updateMitmCaptureAPI,
+} from './mitm'
+export type {
+  MitmBody,
+  MitmHeaders,
+  MitmRequest,
+  MitmResponse,
+  MitmSession,
+  MitmSessionReference,
+} from './mitm'
 export type { ConnectionsSnapshot }
 
 const backend = () => (channel.value === Channel.Singbox ? singbox : clash)

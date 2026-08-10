@@ -38,6 +38,7 @@ export type MitmBody = {
 export type MitmRequest = {
   method: string
   url: string
+  raw_url?: string
   proto: string
   headers: MitmHeaders
   body?: MitmBody
@@ -255,26 +256,35 @@ export const probeClashChannel = async (backend: Backend, timeout: number) => {
 // mihomo 专属(sing-box 官方版的 Clash 兼容 API 不提供)
 // ==========================================================================
 
-// MITM 会话快照用于先探测端点是否存在，避免旧版内核上的 WebSocket 无限重连。
-export const fetchMitmSnapshotAPI = async (): Promise<MitmSnapshot | null> => {
+const fetchMitmJSONAPI = async <T>(path: string): Promise<T | null> => {
   const backend = activeBackend.value
   if (!backend) return null
 
   try {
-    const response = await fetch(`${getUrlFromBackend(backend)}/mitm`, {
+    const response = await fetch(`${getUrlFromBackend(backend)}/${path}`, {
       headers: {
         Authorization: `Bearer ${backend.password}`,
       },
     })
 
-    if (!response.ok) return null
-
-    const snapshot = (await response.json()) as MitmSnapshot
-    return Array.isArray(snapshot.sessions) ? snapshot : null
+    return response.ok ? ((await response.json()) as T) : null
   } catch {
     return null
   }
 }
+
+// MITM 会话快照用于先探测端点是否存在，避免旧版内核上的 WebSocket 无限重连。
+export const fetchMitmSnapshotAPI = async (): Promise<MitmSnapshot | null> => {
+  const snapshot = await fetchMitmJSONAPI<MitmSnapshot>('mitm')
+  return Array.isArray(snapshot?.sessions) ? snapshot : null
+}
+
+export const getMitmCaptureStateAPI = async (): Promise<boolean | null> => {
+  const state = await fetchMitmJSONAPI<{ capture: unknown }>('mitm/capture')
+  return typeof state?.capture === 'boolean' ? state.capture : null
+}
+
+export const setMitmCaptureStateAPI = (capture: boolean) => axios.put('/mitm/capture', { capture })
 
 // 增量事件不能像连接全量快照那样 debounce，否则相邻的 session/remove 会丢失。
 export const subscribeMitmAPI = () => createClashWebSocket<MitmEvent>('mitm', undefined, 0)

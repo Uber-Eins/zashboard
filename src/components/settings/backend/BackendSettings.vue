@@ -180,7 +180,7 @@
     </div>
 
     <div
-      v-if="can('configPatch') && configs && hasVisibleSettings"
+      v-if="hasVisibleSettings"
       class="grid"
     >
       <div class="settings-section-label">
@@ -189,15 +189,17 @@
       <div class="settings-grid">
         <SettingItem
           :setting-key="k.ports"
+          :when="canPatchConfigs"
           class="py-3"
         >
           <div class="flex w-full flex-col">
             <BackendPortsGrid />
           </div>
         </SettingItem>
+        <MitmCaptureSetting :setting-key="k.mitmCapture" />
         <SettingItem
           :setting-key="k.tunMode"
-          :when="!!configs?.tun && !activeBackend?.disableTunMode"
+          :when="canPatchConfigs && !!configs?.tun && !activeBackend?.disableTunMode"
         >
           <div class="setting-item-label">
             {{ $t('tunMode') }}
@@ -211,7 +213,7 @@
         </SettingItem>
         <SettingItem
           :setting-key="k.allowLan"
-          :when="!!configs"
+          :when="canPatchConfigs"
         >
           <div class="setting-item-label">
             {{ $t('allowLan') }}
@@ -223,7 +225,7 @@
             @change="handlerAllowLanChange"
           />
         </SettingItem>
-        <template v-if="!activeBackend?.disableUpgradeCore">
+        <template v-if="canPatchConfigs && !activeBackend?.disableUpgradeCore">
           <SettingItem :setting-key="k.checkCoreUpgrade">
             <div class="setting-item-label">
               {{ $t('checkCoreUpgrade') }}
@@ -269,6 +271,7 @@ import BackendVersion from '@/components/common/BackendVersion.vue'
 import BackendPortsGrid from '@/components/settings/backend/BackendPortsGrid.vue'
 import BackendSwitch from '@/components/settings/backend/BackendSwitch.vue'
 import DnsQuery from '@/components/settings/backend/DnsQuery.vue'
+import MitmCaptureSetting from '@/components/settings/backend/MitmCaptureSetting.vue'
 import { can } from '@/assembly/backend'
 import SettingItem from '@/components/settings/SettingItem.vue'
 import { isSettingVisible, useIsSettingVisible } from '@/composables/settings'
@@ -295,6 +298,7 @@ import UpgradeCoreModal from './UpgradeCoreModal.vue'
 const k = BACKEND_ITEM_KEYS
 const isVisibleBackendSwitch = useIsSettingVisible(k.backend)
 const isVisiblePorts = useIsSettingVisible(k.ports)
+const isVisibleMitmCapture = useIsSettingVisible(k.mitmCapture)
 const isVisibleTunMode = useIsSettingVisible(k.tunMode)
 const isVisibleAllowLan = useIsSettingVisible(k.allowLan)
 const isVisibleCheckUpgrade = useIsSettingVisible(k.checkCoreUpgrade)
@@ -303,6 +307,8 @@ const isVisibleDnsQuery = useIsSettingVisible(k.DNSQuery)
 const canShowTunMode = computed(
   () => isVisibleTunMode.value && !activeBackend.value?.disableTunMode,
 )
+const canShowMitmCapture = computed(() => isVisibleMitmCapture.value && can('mitm'))
+const canPatchConfigs = computed(() => can('configPatch') && !!configs.value)
 
 /** sing-box 内核下只保留 flush 类操作，除非用户开启了「显示全部功能」 */
 /** 当前后端/内核下实际可渲染的操作项 */
@@ -339,13 +345,13 @@ const hasVisibleItems = computed(() => {
 
 const hasVisibleSettings = computed(() => {
   return (
-    can('configPatch') &&
-    !!configs.value &&
-    (isVisiblePorts.value ||
-      (configs.value.tun && canShowTunMode.value) ||
-      isVisibleAllowLan.value ||
-      (!activeBackend.value?.disableUpgradeCore &&
-        (isVisibleCheckUpgrade.value || (checkUpgradeCore.value && isVisibleAutoUpgrade.value))))
+    canShowMitmCapture.value ||
+    (canPatchConfigs.value &&
+      (isVisiblePorts.value ||
+        (configs.value?.tun && canShowTunMode.value) ||
+        isVisibleAllowLan.value ||
+        (!activeBackend.value?.disableUpgradeCore &&
+          (isVisibleCheckUpgrade.value || (checkUpgradeCore.value && isVisibleAutoUpgrade.value)))))
   )
 })
 

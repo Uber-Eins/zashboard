@@ -27,6 +27,7 @@ export const SETTINGS_CATEGORIES: SettingsCategory[] = [
       { key: `${SETTINGS_MENU_KEY.backend}.flushSmartWeights`, label: 'flushSmartWeights' },
       { key: `${SETTINGS_MENU_KEY.backend}.dnsQuery`, label: 'DNSQuery' },
       { key: `${SETTINGS_MENU_KEY.backend}.ports`, label: 'ports' },
+      { key: `${SETTINGS_MENU_KEY.backend}.mitmCapture`, label: 'mitmCapture' },
       { key: `${SETTINGS_MENU_KEY.backend}.tunMode`, label: 'tunMode' },
       { key: `${SETTINGS_MENU_KEY.backend}.allowLan`, label: 'allowLan' },
       { key: `${SETTINGS_MENU_KEY.backend}.checkCoreUpgrade`, label: 'checkCoreUpgrade' },

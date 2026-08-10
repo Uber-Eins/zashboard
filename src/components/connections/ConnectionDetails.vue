@@ -179,6 +179,7 @@ import { getIPInfo, type IPInfo } from '@/api/geoip'
 import { can } from '@/assembly/backend'
 import {
   getConnectionDisplayValue,
+  matchesMitmSessionReference,
   subscribeMitmSessionsAPI,
   type MitmSession,
 } from '@/assembly/connections'
@@ -210,7 +211,7 @@ import ProxyIcon from '../proxies/ProxyIcon.vue'
 
 const KEY = CONNECTIONS_TABLE_ACCESSOR_KEY
 
-const { infoConn, connectionDetailModalShow } = useConnections()
+const { infoConn, connectionDetailModalShow, connectionDetailMitmRequest } = useConnections()
 const { t } = useI18n()
 const details = ref<IPInfo | null>(null)
 const selectedProxy = ref('')
@@ -265,6 +266,12 @@ const availableTabs = computed<TabType[]>(() =>
 
 const mitmConnectionSessions = computed(() => {
   const connectionId = infoConn.value?.id
+  const request = connectionDetailMitmRequest.value
+
+  if (request) {
+    return mitmSessions.value.filter((session) => matchesMitmSessionReference(session, request))
+  }
+
   if (!connectionId) return []
 
   return mitmSessions.value.filter((session) => session.id === connectionId)
@@ -342,7 +349,7 @@ const sections = computed(() => {
   return sectionDefs
     .map((def) => {
       const rows = rowsOf(def.keys)
-      if (def.id === 'basic') {
+      if (def.id === 'basic' && conn.id) {
         rows.unshift({ label: 'ID', value: conn.id })
       }
       return { id: def.id, title: t(def.id), rows }
@@ -371,10 +378,10 @@ watch(
 )
 
 watch(
-  [connectionDetailModalShow, () => infoConn.value?.id, mitmSupported],
-  async ([show, connectionId, supported]) => {
+  [connectionDetailModalShow, () => infoConn.value?.id, connectionDetailMitmRequest, mitmSupported],
+  async ([show, connectionId, request, supported]) => {
     stopMitmStream()
-    if (!show || !connectionId || !supported) return
+    if (!show || (!connectionId && !request) || !supported) return
 
     const run = mitmStreamRun
     const stream = await subscribeMitmSessionsAPI()

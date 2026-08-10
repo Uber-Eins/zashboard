@@ -218,6 +218,9 @@ const en = {
   traffic: 'Traffic',
   sourceAndDestination: 'Source & destination',
   rawData: 'Raw',
+  mitmCapture: 'MITM body capture',
+  mitmCaptureTip:
+    'Request and response headers are always recorded. Enable this to also capture complete bodies; it may increase memory and CPU usage. This changes runtime state only, and the next configuration reload restores the configured value.',
   requestHeaders: 'Request headers',
   responseHeaders: 'Response headers',
   body: 'Body',

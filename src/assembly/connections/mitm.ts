@@ -1,13 +1,35 @@
 import {
   fetchMitmSnapshotAPI,
+  getMitmCaptureStateAPI,
+  setMitmCaptureStateAPI,
   subscribeMitmAPI,
   type MitmSession,
   type MitmSnapshot,
 } from '@/api/clash'
 import { can } from '@/assembly/backend'
 import { shallowRef, watch } from 'vue'
+import { normalizeConnectionEndpoint } from './endpoint'
 
 export type { MitmBody, MitmHeaders, MitmRequest, MitmResponse, MitmSession } from '@/api/clash'
+
+export const fetchMitmCaptureAPI = () =>
+  can('mitm') ? getMitmCaptureStateAPI() : Promise.resolve(null)
+
+export const updateMitmCaptureAPI = (capture: boolean) => {
+  if (!can('mitm')) return Promise.reject(new Error('MITM capture is unsupported'))
+  return setMitmCaptureStateAPI(capture)
+}
+
+export type MitmSessionReference = { url: string; source?: string }
+
+export const matchesMitmSessionReference = (
+  session: MitmSession,
+  reference: MitmSessionReference,
+) =>
+  (session.request.url === reference.url || session.request.raw_url === reference.url) &&
+  (!reference.source ||
+    normalizeConnectionEndpoint(session.source ?? '') ===
+      normalizeConnectionEndpoint(reference.source))
 
 const mergeSession = (previous: MitmSession | undefined, next: MitmSession): MitmSession => {
   if (!previous) return next
