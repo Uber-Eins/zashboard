@@ -83,6 +83,39 @@
             </div>
           </div>
         </template>
+
+        <template v-if="selectedMitmSession">
+          <select
+            v-if="mitmConnectionSessions.length > 1"
+            v-model.number="selectedMitmRequestIndex"
+            class="select select-sm w-full"
+            :aria-label="$t('requestHeaders')"
+          >
+            <option
+              v-for="session in mitmConnectionSessions"
+              :key="session.requestIndex"
+              :value="session.requestIndex"
+            >
+              {{ getMitmSessionLabel(session) }}
+            </option>
+          </select>
+
+          <MitmMessageCard
+            :key="`request-${selectedMitmSession.requestIndex}`"
+            :title="$t('requestHeaders')"
+            :summary="mitmRequestSummary"
+            :headers="selectedMitmSession.request.headers"
+            :body="selectedMitmSession.request.body"
+          />
+          <MitmMessageCard
+            :key="`response-${selectedMitmSession.requestIndex}`"
+            :title="$t('responseHeaders')"
+            :summary="mitmResponseSummary"
+            :headers="selectedMitmSession.response?.headers"
+            :body="selectedMitmSession.response?.body"
+            :error="selectedMitmSession.error"
+          />
+        </template>
       </div>
 
       <!-- 原始 JSON -->
@@ -143,9 +176,15 @@
 
 <script setup lang="ts">
 import { getIPInfo, type IPInfo } from '@/api/geoip'
-import { getConnectionDisplayValue } from '@/assembly/connections'
+import { can } from '@/assembly/backend'
+import {
+  getConnectionDisplayValue,
+  subscribeMitmSessionsAPI,
+  type MitmSession,
+} from '@/assembly/connections'
 import { proxyMap } from '@/assembly/proxies'
 import DialogWrapper from '@/components/common/DialogWrapper.vue'
+import MitmMessageCard from '@/components/connections/MitmMessageCard.vue'
 import ProxyChainPath from '@/components/common/ProxyChainPath.vue'
 import ProxyGroupPanel from '@/components/proxies/ProxyGroupPanel.vue'
 import SourceIPLabels from '@/components/settings/connections/SourceIPLabels.vue'
@@ -163,7 +202,7 @@ import {
 import * as ipaddr from 'ipaddr.js'
 import { last } from 'lodash'
 import { twMerge } from 'tailwind-merge'
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import VueJsonPretty from 'vue-json-pretty'
 import 'vue-json-pretty/lib/styles.css'
@@ -176,6 +215,12 @@ const { t } = useI18n()
 const details = ref<IPInfo | null>(null)
 const selectedProxy = ref('')
 const sourceIPDialogVisible = ref(false)
+const mitmSessions = shallowRef<MitmSession[]>([])
+const selectedMitmRequestIndex = ref<number | null>(null)
+const mitmSupported = computed(() => can('mitm'))
+
+let closeMitmStream: (() => void) | undefined
+let mitmStreamRun = 0
 
 type TabType = 'overview' | 'raw' | 'proxies'
 const tabLabel: Record<TabType, string> = {
@@ -217,6 +262,44 @@ const proxyChainStart = computed(() => {
 const availableTabs = computed<TabType[]>(() =>
   proxyChainStart.value ? ['overview', 'raw', 'proxies'] : ['overview', 'raw'],
 )
+
+const mitmConnectionSessions = computed(() => {
+  const connectionId = infoConn.value?.id
+  if (!connectionId) return []
+
+  return mitmSessions.value.filter((session) => session.id === connectionId)
+})
+
+const selectedMitmSession = computed(() =>
+  mitmConnectionSessions.value.find(
+    (session) => session.requestIndex === selectedMitmRequestIndex.value,
+  ),
+)
+
+const mitmRequestSummary = computed(() => {
+  const request = selectedMitmSession.value?.request
+  if (!request) return ''
+
+  return [request.method, request.url, request.proto].filter(Boolean).join(' ')
+})
+
+const mitmResponseSummary = computed(() => {
+  const response = selectedMitmSession.value?.response
+  if (!response) return ''
+
+  return [response.proto, response.status].filter(Boolean).join(' ')
+})
+
+const getMitmSessionLabel = (session: MitmSession) =>
+  `#${session.requestIndex} ${session.request.method} ${session.request.url}`
+
+const stopMitmStream = () => {
+  mitmStreamRun += 1
+  closeMitmStream?.()
+  closeMitmStream = undefined
+  mitmSessions.value = []
+  selectedMitmRequestIndex.value = null
+}
 
 const sectionDefs: { id: string; keys: CONNECTIONS_TABLE_ACCESSOR_KEY[] }[] = [
   {
@@ -288,6 +371,49 @@ watch(
 )
 
 watch(
+  [connectionDetailModalShow, () => infoConn.value?.id, mitmSupported],
+  async ([show, connectionId, supported]) => {
+    stopMitmStream()
+    if (!show || !connectionId || !supported) return
+
+    const run = mitmStreamRun
+    const stream = await subscribeMitmSessionsAPI()
+
+    if (run !== mitmStreamRun) {
+      stream?.close()
+      return
+    }
+    if (!stream) return
+
+    const unwatch = watch(
+      stream.sessions,
+      (sessions) => {
+        mitmSessions.value = sessions
+      },
+      { immediate: true },
+    )
+
+    closeMitmStream = () => {
+      unwatch()
+      stream.close()
+    }
+  },
+  { immediate: true },
+)
+
+watch(mitmConnectionSessions, (sessions, previousSessions) => {
+  const latest = sessions.at(-1)?.requestIndex ?? null
+  const previousLatest = previousSessions?.at(-1)?.requestIndex ?? null
+  const selectedStillExists = sessions.some(
+    (session) => session.requestIndex === selectedMitmRequestIndex.value,
+  )
+
+  if (!selectedStillExists || selectedMitmRequestIndex.value === previousLatest) {
+    selectedMitmRequestIndex.value = latest
+  }
+})
+
+watch(
   () => destinationIP.value,
   (newIP) => {
     if (!newIP || !isValidDestinationIP.value || isPrivateIP.value) {
@@ -305,4 +431,6 @@ watch(
     })
   },
 )
+
+onBeforeUnmount(stopMitmStream)
 </script>

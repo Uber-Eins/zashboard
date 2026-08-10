@@ -7,6 +7,8 @@ import type { ConnectionDisplayOptions, ConnectionsSnapshot } from './accessor'
 import * as clash from './clash'
 import * as singbox from './singbox'
 
+export { subscribeMitmSessionsAPI } from './mitm'
+export type { MitmBody, MitmHeaders, MitmRequest, MitmResponse, MitmSession } from './mitm'
 export type { ConnectionsSnapshot }
 
 const backend = () => (channel.value === Channel.Singbox ? singbox : clash)

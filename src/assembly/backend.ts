@@ -114,6 +114,8 @@ const soft = computed(() => {
     // /storage/zashboard 设置同步,mihomo 扩展
     syncSettings: mihomoOrForkCore,
     independentLatency: mihomoOrForkCore,
+    // /mitm 请求与响应捕获,mihomo 扩展
+    mitm: mihomoOrForkCore,
     coreUpdateCheck: mihomo,
     // ports / tun / allow-lan 等 PATCH /configs 配置块。
     configPatch: mihomo,

@@ -26,6 +26,57 @@ import { debounce } from 'lodash'
 import ReconnectingWebSocket from 'reconnectingwebsocket'
 import { shallowRef } from 'vue'
 
+export type MitmHeaders = Record<string, string[]>
+
+export type MitmBody = {
+  size: number
+  encoding: string
+  content: string
+  complete: boolean
+}
+
+export type MitmRequest = {
+  method: string
+  url: string
+  proto: string
+  headers: MitmHeaders
+  body?: MitmBody
+}
+
+export type MitmResponse = {
+  statusCode: number
+  status: string
+  proto: string
+  headers: MitmHeaders
+  body?: MitmBody
+}
+
+export type MitmSession = {
+  id: string
+  requestIndex: number
+  startedAt?: string
+  completedAt?: string
+  source?: string
+  capture: boolean
+  request: MitmRequest
+  response?: MitmResponse
+  error?: string
+}
+
+export type MitmSnapshot = {
+  capture: boolean
+  limit: number
+  sessions: MitmSession[]
+}
+
+export type MitmEvent =
+  | ({ type: 'snapshot' } & MitmSnapshot)
+  | { type: 'session'; capture: boolean; session: MitmSession }
+  | { type: 'capture'; capture: boolean }
+  | { type: 'remove'; capture: boolean; id: string; requestIndex: number }
+  | { type: 'clear'; capture: boolean }
+  | { type: 'heartbeat'; capture: boolean }
+
 // ==========================================================================
 // 两方言共用
 // ==========================================================================
@@ -146,7 +197,11 @@ export const upgradeUIAPI = () => {
   return axios.post('/upgrade/ui')
 }
 
-export const createClashWebSocket = <T>(url: string, searchParams?: Record<string, string>) => {
+export const createClashWebSocket = <T>(
+  url: string,
+  searchParams?: Record<string, string>,
+  messageInterval: number = url === 'logs' ? 0 : 100,
+) => {
   const backend = activeBackend.value!
   const resurl = new URL(`${getUrlFromBackend(backend).replace('http', 'ws')}/${url}`)
 
@@ -169,7 +224,7 @@ export const createClashWebSocket = <T>(url: string, searchParams?: Record<strin
     data.value = JSON.parse(message)
   }
 
-  websocket.onmessage = url === 'logs' ? messageHandler : debounce(messageHandler, 100)
+  websocket.onmessage = messageInterval ? debounce(messageHandler, messageInterval) : messageHandler
 
   return {
     data,
@@ -199,6 +254,30 @@ export const probeClashChannel = async (backend: Backend, timeout: number) => {
 // ==========================================================================
 // mihomo 专属(sing-box 官方版的 Clash 兼容 API 不提供)
 // ==========================================================================
+
+// MITM 会话快照用于先探测端点是否存在，避免旧版内核上的 WebSocket 无限重连。
+export const fetchMitmSnapshotAPI = async (): Promise<MitmSnapshot | null> => {
+  const backend = activeBackend.value
+  if (!backend) return null
+
+  try {
+    const response = await fetch(`${getUrlFromBackend(backend)}/mitm`, {
+      headers: {
+        Authorization: `Bearer ${backend.password}`,
+      },
+    })
+
+    if (!response.ok) return null
+
+    const snapshot = (await response.json()) as MitmSnapshot
+    return Array.isArray(snapshot.sessions) ? snapshot : null
+  } catch {
+    return null
+  }
+}
+
+// 增量事件不能像连接全量快照那样 debounce，否则相邻的 session/remove 会丢失。
+export const subscribeMitmAPI = () => createClashWebSocket<MitmEvent>('mitm', undefined, 0)
 
 // smart 内核的节点权重。是否暴露由数据决定(proxy.type === 'smart'),不走能力表。
 export const fetchSmartWeightsAPI = () => {

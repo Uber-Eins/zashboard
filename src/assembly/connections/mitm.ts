@@ -1,0 +1,93 @@
+import {
+  fetchMitmSnapshotAPI,
+  subscribeMitmAPI,
+  type MitmSession,
+  type MitmSnapshot,
+} from '@/api/clash'
+import { can } from '@/assembly/backend'
+import { shallowRef, watch } from 'vue'
+
+export type { MitmBody, MitmHeaders, MitmRequest, MitmResponse, MitmSession } from '@/api/clash'
+
+const mergeSession = (previous: MitmSession | undefined, next: MitmSession): MitmSession => {
+  if (!previous) return next
+
+  return {
+    ...previous,
+    ...next,
+    request: {
+      ...previous.request,
+      ...next.request,
+    },
+    response: next.response
+      ? {
+          ...previous.response,
+          ...next.response,
+        }
+      : previous.response,
+  }
+}
+
+export const subscribeMitmSessionsAPI = async () => {
+  if (!can('mitm')) return null
+
+  const initialSnapshot = await fetchMitmSnapshotAPI()
+  if (!initialSnapshot) return null
+
+  const sessions = shallowRef<MitmSession[]>([])
+  let sessionMap = new Map<number, MitmSession>()
+
+  const publish = () => {
+    sessions.value = Array.from(sessionMap.values()).sort(
+      (left, right) => left.requestIndex - right.requestIndex,
+    )
+  }
+
+  const replaceSnapshot = (snapshot: Pick<MitmSnapshot, 'sessions'>) => {
+    sessionMap = new Map(
+      snapshot.sessions.map((session) => [session.requestIndex, session] as const),
+    )
+    publish()
+  }
+
+  replaceSnapshot(initialSnapshot)
+
+  const ws = subscribeMitmAPI()
+  const unwatch = watch(
+    ws.data,
+    (event) => {
+      if (!event) return
+
+      switch (event.type) {
+        case 'snapshot':
+          replaceSnapshot(event)
+          break
+        case 'session':
+          sessionMap.set(
+            event.session.requestIndex,
+            mergeSession(sessionMap.get(event.session.requestIndex), event.session),
+          )
+          publish()
+          break
+        case 'remove':
+          sessionMap.delete(event.requestIndex)
+          publish()
+          break
+        case 'clear':
+          sessionMap.clear()
+          publish()
+          break
+      }
+    },
+    // 增量消息必须逐条消费，不能被 Vue 的异步 watcher 批处理合并。
+    { flush: 'sync' },
+  )
+
+  return {
+    sessions,
+    close: () => {
+      unwatch()
+      ws.close()
+    },
+  }
+}
