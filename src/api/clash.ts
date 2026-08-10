@@ -15,6 +15,7 @@ import type {
   Backend,
   Config,
   DNSQuery,
+  ModuleInfo,
   NodeRank,
   Proxy,
   ProxyProvider,
@@ -255,6 +256,30 @@ export const probeClashChannel = async (backend: Backend, timeout: number) => {
 // ==========================================================================
 // mihomo 专属(sing-box 官方版的 Clash 兼容 API 不提供)
 // ==========================================================================
+
+// fork mihomo 的配置模块管理端点。先用 probeModulesAPI 静默接受 404，
+// 由 assembly/modules.ts 依据真实响应决定是否向用户显示入口。
+export const fetchModulesAPI = () => {
+  return axios.get<{ modules: Record<string, ModuleInfo> }>('/modules')
+}
+
+export const probeModulesAPI = () => {
+  return axios.get<{ modules: Record<string, ModuleInfo> }>('/modules', {
+    validateStatus: (status) => (status >= 200 && status < 300) || status === 404,
+  })
+}
+
+export const fetchModuleAPI = (name: string) => {
+  return axios.get<ModuleInfo>(`/modules/${encodeURIComponent(name)}`)
+}
+
+export const patchModuleAPI = (name: string, enable: boolean) => {
+  return axios.patch(`/modules/${encodeURIComponent(name)}`, { enable })
+}
+
+export const fetchModuleConfigAPI = () => {
+  return axios.get<string>('/configs/modules', { responseType: 'text' })
+}
 
 const fetchMitmJSONAPI = async <T>(path: string): Promise<T | null> => {
   const backend = activeBackend.value

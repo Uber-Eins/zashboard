@@ -1,4 +1,5 @@
 import { can, type Cap } from '@/assembly/backend'
+import { moduleAvailability, probeModules } from '@/assembly/modules'
 import { ROUTE_NAME } from '@/constant'
 import { renderRoutes } from '@/helper'
 import { i18n } from '@/i18n'
@@ -7,6 +8,7 @@ import { activeBackend } from '@/store/setup'
 import ConnectionsPage from '@/views/ConnectionsPage.vue'
 import HomePage from '@/views/HomePage.vue'
 import LogsPage from '@/views/LogsPage.vue'
+import ModulesPage from '@/views/ModulesPage.vue'
 import OverviewPage from '@/views/OverviewPage.vue'
 import ProxiesPage from '@/views/ProxiesPage.vue'
 import RulesPage from '@/views/RulesPage.vue'
@@ -41,6 +43,11 @@ const childrenRouter = [
     path: 'rules',
     name: ROUTE_NAME.rules,
     component: RulesPage,
+  },
+  {
+    path: 'modules',
+    name: ROUTE_NAME.modules,
+    component: ModulesPage,
   },
   {
     path: 'tools',
@@ -92,7 +99,21 @@ const setTitleByName = (name: string | symbol | undefined) => {
   }
 }
 
-router.beforeEach((to, from) => {
+router.beforeEach(async (to, from) => {
+  if (!activeBackend.value && to.name !== ROUTE_NAME.setup) {
+    return { name: ROUTE_NAME.setup }
+  }
+
+  if (to.name === ROUTE_NAME.modules && !(await probeModules())) {
+    return { name: ROUTE_NAME.proxies }
+  }
+
+  // Block navigation to a page the active backend's channels can't serve.
+  const requiredCap = typeof to.name === 'string' ? ROUTE_CAPABILITY[to.name] : undefined
+  if (requiredCap && !can(requiredCap)) {
+    return { name: ROUTE_NAME.proxies }
+  }
+
   const toIndex = renderRoutes.value.findIndex((item) => item === to.name)
   const fromIndex = renderRoutes.value.findIndex((item) => item === from.name)
 
@@ -102,17 +123,6 @@ router.beforeEach((to, from) => {
     to.meta.transition = 'slide-right'
   } else if (toIndex !== fromIndex) {
     to.meta.transition = toIndex < fromIndex ? 'slide-right' : 'slide-left'
-  }
-
-  if (!activeBackend.value && to.name !== ROUTE_NAME.setup) {
-    router.push({ name: ROUTE_NAME.setup })
-    return
-  }
-
-  // Block navigation to a page the active backend's channels can't serve.
-  const requiredCap = typeof to.name === 'string' ? ROUTE_CAPABILITY[to.name] : undefined
-  if (requiredCap && !can(requiredCap)) {
-    router.push({ name: ROUTE_NAME.proxies })
   }
 })
 
@@ -127,10 +137,12 @@ watch([language, activeBackend], () => {
 })
 
 // 能力变化(切后端 / 内核探测出结果)后,把停留在已失效页面的用户送回代理页。
-watch(renderRoutes, () => {
+watch([renderRoutes, moduleAvailability], () => {
   const routeName = router.currentRoute.value.name
   const requiredCap = typeof routeName === 'string' ? ROUTE_CAPABILITY[routeName] : undefined
-  if (requiredCap && !can(requiredCap)) {
+  const modulesUnavailable =
+    routeName === ROUTE_NAME.modules && moduleAvailability.value === 'unavailable'
+  if ((requiredCap && !can(requiredCap)) || modulesUnavailable) {
     router.push({ name: ROUTE_NAME.proxies })
   }
 })

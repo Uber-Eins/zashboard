@@ -72,6 +72,20 @@
           </button>
         </SettingItem>
         <SettingItem
+          :setting-key="k.viewConfigs"
+          :when="modulesAvailable"
+        >
+          <div class="setting-item-label">
+            {{ $t('viewConfigs') }}
+          </div>
+          <button
+            class="btn btn-sm"
+            @click="showViewConfigModal = true"
+          >
+            <DocumentMagnifyingGlassIcon class="h-4 w-4" />
+          </button>
+        </SettingItem>
+        <SettingItem
           :setting-key="k.reloadConfigs"
           :when="can('reloadConfigs')"
         >
@@ -256,6 +270,7 @@
 
     <UpgradeCoreModal v-model="showUpgradeCoreModal" />
     <UpdateConfigModal v-model="showUpdateConfigModal" />
+    <ViewConfigModal v-model="showViewConfigModal" />
   </div>
 </template>
 
@@ -273,6 +288,7 @@ import BackendSwitch from '@/components/settings/backend/BackendSwitch.vue'
 import DnsQuery from '@/components/settings/backend/DnsQuery.vue'
 import MitmCaptureSetting from '@/components/settings/backend/MitmCaptureSetting.vue'
 import { can } from '@/assembly/backend'
+import { modulesAvailable } from '@/assembly/modules'
 import SettingItem from '@/components/settings/SettingItem.vue'
 import { isSettingVisible, useIsSettingVisible } from '@/composables/settings'
 import { BACKEND_ITEM_KEYS } from '@/config/settingsItems'
@@ -288,12 +304,14 @@ import {
   ArrowPathIcon,
   ArrowPathRoundedSquareIcon,
   ArrowUpCircleIcon,
+  DocumentMagnifyingGlassIcon,
   PencilSquareIcon,
   TrashIcon,
 } from '@heroicons/vue/24/outline'
 import { computed, ref } from 'vue'
 import UpdateConfigModal from './UpdateConfigModal.vue'
 import UpgradeCoreModal from './UpgradeCoreModal.vue'
+import ViewConfigModal from './ViewConfigModal.vue'
 
 const k = BACKEND_ITEM_KEYS
 const isVisibleBackendSwitch = useIsSettingVisible(k.backend)
@@ -319,6 +337,7 @@ const renderableActionKeys = computed(() => {
 
   if (can('coreUpgrade') && !activeBackend.value?.disableUpgradeCore) keys.push(k.upgradeCore)
   if (can('coreRestart')) keys.push(k.restartCore)
+  if (modulesAvailable.value) keys.push(k.viewConfigs)
   if (can('reloadConfigs')) keys.push(k.reloadConfigs)
   if (can('updateConfigs')) keys.push(k.updateConfigs)
   if (can('updateGeoDatabase')) keys.push(k.updateGeoDatabase)
@@ -363,6 +382,7 @@ const reloadAll = () => {
 
 const showUpgradeCoreModal = ref(false)
 const showUpdateConfigModal = ref(false)
+const showViewConfigModal = ref(false)
 
 const isCoreRestarting = ref(false)
 const handlerClickRestartCore = async () => {

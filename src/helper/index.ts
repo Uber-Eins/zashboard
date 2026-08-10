@@ -1,5 +1,6 @@
 import { can } from '@/assembly/backend'
 import { connectionAccessor } from '@/assembly/connections'
+import { modulesAvailable } from '@/assembly/modules'
 import { hiddenGroupMap, proxyMap } from '@/assembly/proxies'
 import { NOT_CONNECTED, PROXY_CHAIN_DIRECTION, PROXY_TYPE, ROUTE_NAME } from '@/constant'
 import { showNotification } from '@/helper/notification'
@@ -126,6 +127,7 @@ export const renderRoutes = computed(() => {
   // capability gate per route; routes not listed here are always shown
   const routeCapable: Partial<Record<ROUTE_NAME, boolean>> = {
     [ROUTE_NAME.rules]: can('rules'),
+    [ROUTE_NAME.modules]: modulesAvailable.value,
     [ROUTE_NAME.tools]: can('tools'),
   }
   return Object.values(ROUTE_NAME).filter((r) => {

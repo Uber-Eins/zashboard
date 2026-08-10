@@ -109,6 +109,19 @@ export type RuleProvider = {
   vehicleType: string
 }
 
+export type ModuleInfo = {
+  enable: boolean
+  type: string
+  path: string
+  url?: string
+  interval: number
+  updatedAt?: string
+}
+
+export type Module = ModuleInfo & {
+  name: string
+}
+
 export type ClashConnectionRawMessage = {
   id: string
   download: number

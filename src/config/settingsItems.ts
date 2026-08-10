@@ -19,6 +19,7 @@ export const SETTINGS_CATEGORIES: SettingsCategory[] = [
       { key: `${SETTINGS_MENU_KEY.backend}.backendSwitch`, label: 'backend' },
       { key: `${SETTINGS_MENU_KEY.backend}.upgradeCore`, label: 'upgradeCore' },
       { key: `${SETTINGS_MENU_KEY.backend}.restartCore`, label: 'restartCore' },
+      { key: `${SETTINGS_MENU_KEY.backend}.viewConfigs`, label: 'viewConfigs' },
       { key: `${SETTINGS_MENU_KEY.backend}.reloadConfigs`, label: 'reloadConfigs' },
       { key: `${SETTINGS_MENU_KEY.backend}.updateConfigs`, label: 'updateConfigs' },
       { key: `${SETTINGS_MENU_KEY.backend}.updateGeoDatabase`, label: 'updateGeoDatabase' },

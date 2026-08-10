@@ -8,9 +8,18 @@ const zh: LANG_MESSAGE = {
   rules: '规则',
   connections: '连接',
   logs: '日志',
+  modules: '模块',
   tools: '工具',
   tailscale: 'Tailscale',
   terminal: '终端',
+
+  // 模块页
+  modulePath: '本地路径',
+  moduleURL: '来源 URL',
+  moduleUpdateInterval: '更新间隔',
+  moduleNeverUpdated: '从未更新',
+  enableModule: '启用模块 {name}',
+  disableModule: '禁用模块 {name}',
 
   // 后端类型
   default: '默认',
@@ -254,6 +263,7 @@ const zh: LANG_MESSAGE = {
   noExpire: '不限时',
   updated: '更新于',
   upgradeDashboard: '升级面板',
+  viewConfigs: '查看配置',
   reloadConfigs: '重载配置',
   updateConfigs: '更新配置',
   updateConfigsSuccess: '配置更新成功',

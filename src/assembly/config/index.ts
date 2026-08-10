@@ -33,6 +33,7 @@ export const updateConfigs = async (cfg: Record<string, string | boolean | objec
 
 // 配置 / 缓存 / DNS 维护动作(Clash 专属),经 config 域门面暴露给 view。
 export {
+  fetchModuleConfigAPI,
   flushDNSCacheAPI,
   flushFakeIPAPI,
   queryDNSAPI,

@@ -4,6 +4,7 @@ import {
   CubeTransparentIcon,
   DocumentTextIcon,
   GlobeAltIcon,
+  PuzzlePieceIcon,
   SwatchIcon,
   WrenchScrewdriverIcon,
 } from '@heroicons/vue/24/outline'
@@ -154,6 +155,7 @@ export enum ROUTE_NAME {
   connections = 'connections',
   logs = 'logs',
   rules = 'rules',
+  modules = 'modules',
   tools = 'tools',
   settings = 'settings',
   setup = 'setup',
@@ -164,6 +166,7 @@ export const ROUTE_ICON_MAP = {
   [ROUTE_NAME.proxies]: GlobeAltIcon,
   [ROUTE_NAME.connections]: ArrowsRightLeftIcon,
   [ROUTE_NAME.rules]: SwatchIcon,
+  [ROUTE_NAME.modules]: PuzzlePieceIcon,
   [ROUTE_NAME.logs]: DocumentTextIcon,
   [ROUTE_NAME.tools]: WrenchScrewdriverIcon,
   [ROUTE_NAME.settings]: Cog6ToothIcon,

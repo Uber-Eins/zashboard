@@ -6,9 +6,18 @@ const en = {
   rules: 'Rules',
   connections: 'Connections',
   logs: 'Logs',
+  modules: 'Modules',
   tools: 'Tools',
   tailscale: 'Tailscale',
   terminal: 'Terminal',
+
+  // Modules page
+  modulePath: 'Local path',
+  moduleURL: 'Source URL',
+  moduleUpdateInterval: 'Update interval',
+  moduleNeverUpdated: 'Never updated',
+  enableModule: 'Enable module {name}',
+  disableModule: 'Disable module {name}',
 
   // Backend type
   default: 'Default',
@@ -253,6 +262,7 @@ const en = {
   noExpire: 'No expiry',
   updated: 'Updated',
   upgradeDashboard: 'Upgrade dashboard',
+  viewConfigs: 'View configuration',
   reloadConfigs: 'Reload configs',
   updateConfigs: 'Update configs',
   updateConfigsSuccess: 'Configs updated successfully',

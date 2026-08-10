@@ -1,3 +1,6 @@
+# ⚠️ 重要 ⚠️
+本fork版本專爲本人fork的mihomo提供支援.
+
 # zashboard
 
 <p align="center">

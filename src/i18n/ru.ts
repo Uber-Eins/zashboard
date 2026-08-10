@@ -8,9 +8,18 @@ const ru: LANG_MESSAGE = {
   rules: 'Правила',
   connections: 'Подключения',
   logs: 'Журнал',
+  modules: 'Модули',
   tools: 'Инструменты',
   tailscale: 'Tailscale',
   terminal: 'Терминал',
+
+  // Modules page
+  modulePath: 'Локальный путь',
+  moduleURL: 'URL источника',
+  moduleUpdateInterval: 'Интервал обновления',
+  moduleNeverUpdated: 'Никогда не обновлялся',
+  enableModule: 'Включить модуль {name}',
+  disableModule: 'Отключить модуль {name}',
 
   // Backend type
   default: 'По умолчанию',
@@ -255,6 +264,7 @@ const ru: LANG_MESSAGE = {
   noExpire: 'Нет',
   updated: 'Обновлено',
   upgradeDashboard: 'Обновить панель до новой версии',
+  viewConfigs: 'Просмотреть конфигурацию',
   reloadConfigs: 'Перезагрузить конфигурации',
   updateConfigs: 'Обновить конфигурации',
   updateConfigsSuccess: 'Конфигурации успешно обновлены',

@@ -8,9 +8,18 @@ const zhTW: LANG_MESSAGE = {
   rules: '規則',
   connections: '連接',
   logs: '日誌',
+  modules: '模組',
   tools: '工具',
   tailscale: 'Tailscale',
   terminal: '終端',
+
+  // 模組頁
+  modulePath: '本機路徑',
+  moduleURL: '來源 URL',
+  moduleUpdateInterval: '更新間隔',
+  moduleNeverUpdated: '尚未更新',
+  enableModule: '啟用模組 {name}',
+  disableModule: '停用模組 {name}',
 
   // 後端類型
   default: '預設',
@@ -254,6 +263,7 @@ const zhTW: LANG_MESSAGE = {
   noExpire: '不限時',
   updated: '更新於',
   upgradeDashboard: '升級面板',
+  viewConfigs: '查看配置',
   reloadConfigs: '重載配置',
   updateConfigs: '更新配置',
   updateConfigsSuccess: '配置更新成功',
