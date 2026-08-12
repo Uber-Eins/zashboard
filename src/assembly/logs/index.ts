@@ -45,7 +45,13 @@ export const initLogs = () => {
   logs.value = []
 
   const accumulator = createLogsAccumulator(logs, () => isPaused.value)
-  const subscription = backend().subscribeLogs({ level: logLevel.value }, accumulator.push)
+  const params: Record<string, string> = { level: logLevel.value }
+
+  // Clash-compatible cores that do not implement this extension ignore the extra query.
+  // The enhanced mihomo stream returns transaction fields used to correlate with /mitm.
+  if (channel.value === Channel.Clash) params.format = 'structured'
+
+  const subscription = backend().subscribeLogs(params, accumulator.push)
 
   cancel = () => {
     accumulator.dispose()

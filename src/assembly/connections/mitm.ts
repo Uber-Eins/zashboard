@@ -20,16 +20,23 @@ export const updateMitmCaptureAPI = (capture: boolean) => {
   return setMitmCaptureStateAPI(capture)
 }
 
-export type MitmSessionReference = { url: string; source?: string }
+export type MitmSessionReference = { transactionId: string } | { url: string; source?: string }
 
 export const matchesMitmSessionReference = (
   session: MitmSession,
   reference: MitmSessionReference,
-) =>
-  (session.request.url === reference.url || session.request.raw_url === reference.url) &&
-  (!reference.source ||
-    normalizeConnectionEndpoint(session.source ?? '') ===
-      normalizeConnectionEndpoint(reference.source))
+) => {
+  if ('transactionId' in reference) {
+    return session.transactionId === reference.transactionId
+  }
+
+  return (
+    (session.request.url === reference.url || session.request.raw_url === reference.url) &&
+    (!reference.source ||
+      normalizeConnectionEndpoint(session.source ?? '') ===
+        normalizeConnectionEndpoint(reference.source))
+  )
+}
 
 const mergeSession = (previous: MitmSession | undefined, next: MitmSession): MitmSession => {
   if (!previous) return next

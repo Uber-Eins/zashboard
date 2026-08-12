@@ -170,9 +170,23 @@ export type Connection = ConnectionRawMessage & {
 export type Log = {
   type: LOG_LEVEL
   payload: string
+  time?: string
+  fields?: LogField[]
+  transactionId?: string
 }
 
 export type LogWithSeq = Log & { seq: number; time: string }
+
+export type LogField = {
+  key: string
+  value: string
+}
+
+export type LogTransactionStatus = {
+  active: boolean
+  modified: boolean
+  failed: boolean
+}
 
 export type DNSQuery = {
   AD: boolean

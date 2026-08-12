@@ -207,6 +207,10 @@ const zhTW: LANG_MESSAGE = {
   allConnections: '全部',
   logLevel: '日誌等級',
   logType: '日誌類型',
+  logTransactionStatus: '交易狀態',
+  logActive: '活躍',
+  logModified: '已修改',
+  logFailed: '失敗',
 
   // Connections, proxies, and rules pages
   twoColumnProxyGroup: '雙列顯示代理組',

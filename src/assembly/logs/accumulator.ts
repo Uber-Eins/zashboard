@@ -10,7 +10,7 @@ import { throttle } from 'lodash'
 import { watch, type Ref } from 'vue'
 
 export interface LogsAccumulator {
-  // 后端产出的一批原始日志(已是 { type, payload } 形态)投递入表。
+  // 后端产出的一批归一化日志投递入表。
   push: (batch: Log[]) => void
   dispose: () => void
 }
@@ -67,7 +67,7 @@ export const createLogsAccumulator = (
       logsTemp.unshift({
         ...data,
         payload,
-        time: dayjs().format('HH:mm:ss'),
+        time: data.time || dayjs().format('HH:mm:ss'),
         seq: idx++,
       })
     }

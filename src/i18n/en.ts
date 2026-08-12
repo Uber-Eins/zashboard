@@ -206,6 +206,10 @@ const en = {
   allConnections: 'All',
   logLevel: 'Log level',
   logType: 'Log type',
+  logTransactionStatus: 'Transaction status',
+  logActive: 'Active',
+  logModified: 'Modified',
+  logFailed: 'Failed',
 
   // Connections, proxies, and rules pages
   twoColumnProxyGroup: 'Two-column proxy groups',

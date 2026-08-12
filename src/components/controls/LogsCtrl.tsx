@@ -9,6 +9,8 @@ import {
   logFilterEnabled,
   logFilterRegex,
   logLevel,
+  logTransactionStatusAvailable,
+  logTransactionStatusFilter,
   logTypeFilter,
   logs,
   supportedLogLevels,
@@ -158,6 +160,26 @@ export default defineComponent({
         />
       )
 
+      const transactionStatusSelect = logTransactionStatusAvailable.value ? (
+        <select
+          class={['select select-sm', isLargeCtrlsBar.value ? 'w-30' : 'w-24']}
+          aria-label={t('logTransactionStatus')}
+          v-model={logTransactionStatusFilter.value}
+        >
+          <option value="">{t('all')}</option>
+          <option value="active">{t('logActive')}</option>
+          <option value="modified">{t('logModified')}</option>
+          <option value="failed">{t('logFailed')}</option>
+        </select>
+      ) : null
+
+      const levelAndStatusSelects = (
+        <div class="flex min-w-0 items-center gap-1">
+          {levelSelect}
+          {transactionStatusSelect}
+        </div>
+      )
+
       const logTypeSelect = (
         <select
           class={[
@@ -246,7 +268,7 @@ export default defineComponent({
       )
 
       const buttons = (
-        <div class="flex items-center gap-2">
+        <div class="flex shrink-0 items-center gap-1 sm:gap-2">
           {settingsModal}
           <button
             class="btn btn-circle btn-sm"
@@ -289,8 +311,8 @@ export default defineComponent({
 
       const content = !isLargeCtrlsBar.value ? (
         <div class="flex flex-col gap-2 p-2">
-          <div class="flex w-full justify-between gap-2">
-            <div class="flex flex-1">{levelSelect}</div>
+          <div class="flex w-full flex-wrap justify-between gap-2">
+            {levelAndStatusSelects}
             {buttons}
           </div>
           <div class="join">
@@ -301,7 +323,7 @@ export default defineComponent({
       ) : (
         <div class="flex items-center justify-between gap-2 p-2">
           <div class="flex items-center gap-2">
-            {levelSelect}
+            {levelAndStatusSelects}
             <div class="join w-96">
               {logTypeSelect}
               {searchInput}

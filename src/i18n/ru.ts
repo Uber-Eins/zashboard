@@ -208,6 +208,10 @@ const ru: LANG_MESSAGE = {
   allConnections: 'Все',
   logLevel: 'Уровень журнала',
   logType: 'Тип журнала',
+  logTransactionStatus: 'Статус транзакции',
+  logActive: 'Активные',
+  logModified: 'Изменённые',
+  logFailed: 'С ошибкой',
 
   // Connections, proxies, and rules pages
   twoColumnProxyGroup: 'Группа прокси в два столбца',

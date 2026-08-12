@@ -53,9 +53,35 @@ export type MitmResponse = {
   body?: MitmBody
 }
 
+export type MitmTransactionState = 'active' | 'completed' | 'failed' | 'aborted' | 'cancelled'
+
+export type MitmActionOutcome =
+  'applied' | 'responded' | 'aborted' | 'unchanged' | 'skipped' | 'failed'
+
+export type MitmAction = {
+  index: number
+  at: string
+  phase: 'request' | 'response'
+  source: 'rewrite' | 'script' | 'handler' | string
+  kind: string
+  outcome: MitmActionOutcome
+  modified: boolean
+  name?: string
+  rule?: string
+  statusCode?: number
+  target?: string
+  fields?: string
+  error?: string
+}
+
 export type MitmSession = {
-  id: string
+  id?: string
+  transactionId?: string
   requestIndex: number
+  state?: MitmTransactionState
+  modified?: boolean
+  actions?: MitmAction[]
+  failure?: Record<string, unknown>
   startedAt?: string
   completedAt?: string
   source?: string
@@ -75,7 +101,7 @@ export type MitmEvent =
   | ({ type: 'snapshot' } & MitmSnapshot)
   | { type: 'session'; capture: boolean; session: MitmSession }
   | { type: 'capture'; capture: boolean }
-  | { type: 'remove'; capture: boolean; id: string; requestIndex: number }
+  | { type: 'remove'; capture: boolean; id?: string; requestIndex: number }
   | { type: 'clear'; capture: boolean }
   | { type: 'heartbeat'; capture: boolean }
 
