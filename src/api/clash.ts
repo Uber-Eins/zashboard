@@ -21,6 +21,7 @@ import type {
   ProxyProvider,
   Rule,
   RuleProvider,
+  ScriptInfo,
 } from '@/types'
 import axios from 'axios'
 import { debounce } from 'lodash'
@@ -301,6 +302,25 @@ export const fetchModuleAPI = (name: string) => {
 
 export const patchModuleAPI = (name: string, enable: boolean) => {
   return axios.patch(`/modules/${encodeURIComponent(name)}`, { enable })
+}
+
+// fork mihomo 的脚本管理端点。probeScriptsAPI 用于按真实端点能力决定是否显示入口。
+export const fetchScriptsAPI = () => {
+  return axios.get<{ scripts: Record<string, ScriptInfo> }>('/scripts')
+}
+
+export const probeScriptsAPI = () => {
+  return axios.get<{ scripts: Record<string, ScriptInfo> }>('/scripts', {
+    validateStatus: (status) => (status >= 200 && status < 300) || status === 404,
+  })
+}
+
+export const fetchScriptAPI = (name: string) => {
+  return axios.get<ScriptInfo>(`/scripts/${encodeURIComponent(name)}`)
+}
+
+export const patchScriptAPI = (name: string, enable: boolean) => {
+  return axios.patch(`/scripts/${encodeURIComponent(name)}`, { enable })
 }
 
 export const fetchModuleConfigAPI = () => {

@@ -2,6 +2,7 @@ import { can } from '@/assembly/backend'
 import { connectionAccessor } from '@/assembly/connections'
 import { modulesAvailable } from '@/assembly/modules'
 import { hiddenGroupMap, proxyMap } from '@/assembly/proxies'
+import { scriptsAvailable } from '@/assembly/scripts'
 import { NOT_CONNECTED, PROXY_CHAIN_DIRECTION, PROXY_TYPE, ROUTE_NAME } from '@/constant'
 import { showNotification } from '@/helper/notification'
 import {
@@ -128,6 +129,7 @@ export const renderRoutes = computed(() => {
   const routeCapable: Partial<Record<ROUTE_NAME, boolean>> = {
     [ROUTE_NAME.rules]: can('rules'),
     [ROUTE_NAME.modules]: modulesAvailable.value,
+    [ROUTE_NAME.scripts]: scriptsAvailable.value,
     [ROUTE_NAME.tools]: can('tools'),
   }
   return Object.values(ROUTE_NAME).filter((r) => {

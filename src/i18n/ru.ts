@@ -9,6 +9,7 @@ const ru: LANG_MESSAGE = {
   connections: 'Подключения',
   logs: 'Журнал',
   modules: 'Модули',
+  scripts: 'Скрипты',
   tools: 'Инструменты',
   tailscale: 'Tailscale',
   terminal: 'Терминал',
@@ -20,6 +21,14 @@ const ru: LANG_MESSAGE = {
   moduleNeverUpdated: 'Никогда не обновлялся',
   enableModule: 'Включить модуль {name}',
   disableModule: 'Отключить модуль {name}',
+
+  // Scripts page
+  scriptPath: 'Локальный путь',
+  scriptURL: 'URL источника',
+  scriptUpdateInterval: 'Интервал обновления',
+  scriptNeverUpdated: 'Никогда не обновлялся',
+  enableScript: 'Включить скрипт {name}',
+  disableScript: 'Отключить скрипт {name}',
 
   // Backend type
   default: 'По умолчанию',

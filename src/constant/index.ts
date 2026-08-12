@@ -1,6 +1,7 @@
 import {
   ArrowsRightLeftIcon,
   Cog6ToothIcon,
+  CommandLineIcon,
   CubeTransparentIcon,
   DocumentTextIcon,
   GlobeAltIcon,
@@ -156,6 +157,7 @@ export enum ROUTE_NAME {
   logs = 'logs',
   rules = 'rules',
   modules = 'modules',
+  scripts = 'scripts',
   tools = 'tools',
   settings = 'settings',
   setup = 'setup',
@@ -167,6 +169,7 @@ export const ROUTE_ICON_MAP = {
   [ROUTE_NAME.connections]: ArrowsRightLeftIcon,
   [ROUTE_NAME.rules]: SwatchIcon,
   [ROUTE_NAME.modules]: PuzzlePieceIcon,
+  [ROUTE_NAME.scripts]: CommandLineIcon,
   [ROUTE_NAME.logs]: DocumentTextIcon,
   [ROUTE_NAME.tools]: WrenchScrewdriverIcon,
   [ROUTE_NAME.settings]: Cog6ToothIcon,

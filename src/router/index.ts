@@ -1,5 +1,6 @@
 import { can, type Cap } from '@/assembly/backend'
 import { moduleAvailability, probeModules } from '@/assembly/modules'
+import { probeScripts, scriptAvailability } from '@/assembly/scripts'
 import { ROUTE_NAME } from '@/constant'
 import { renderRoutes } from '@/helper'
 import { i18n } from '@/i18n'
@@ -12,6 +13,7 @@ import ModulesPage from '@/views/ModulesPage.vue'
 import OverviewPage from '@/views/OverviewPage.vue'
 import ProxiesPage from '@/views/ProxiesPage.vue'
 import RulesPage from '@/views/RulesPage.vue'
+import ScriptsPage from '@/views/ScriptsPage.vue'
 import SettingsPage from '@/views/SettingsPage.vue'
 import SetupPage from '@/views/SetupPage.vue'
 import { useTitle } from '@vueuse/core'
@@ -48,6 +50,11 @@ const childrenRouter = [
     path: 'modules',
     name: ROUTE_NAME.modules,
     component: ModulesPage,
+  },
+  {
+    path: 'scripts',
+    name: ROUTE_NAME.scripts,
+    component: ScriptsPage,
   },
   {
     path: 'tools',
@@ -108,6 +115,10 @@ router.beforeEach(async (to, from) => {
     return { name: ROUTE_NAME.proxies }
   }
 
+  if (to.name === ROUTE_NAME.scripts && !(await probeScripts())) {
+    return { name: ROUTE_NAME.proxies }
+  }
+
   // Block navigation to a page the active backend's channels can't serve.
   const requiredCap = typeof to.name === 'string' ? ROUTE_CAPABILITY[to.name] : undefined
   if (requiredCap && !can(requiredCap)) {
@@ -137,12 +148,14 @@ watch([language, activeBackend], () => {
 })
 
 // 能力变化(切后端 / 内核探测出结果)后,把停留在已失效页面的用户送回代理页。
-watch([renderRoutes, moduleAvailability], () => {
+watch([renderRoutes, moduleAvailability, scriptAvailability], () => {
   const routeName = router.currentRoute.value.name
   const requiredCap = typeof routeName === 'string' ? ROUTE_CAPABILITY[routeName] : undefined
   const modulesUnavailable =
     routeName === ROUTE_NAME.modules && moduleAvailability.value === 'unavailable'
-  if ((requiredCap && !can(requiredCap)) || modulesUnavailable) {
+  const scriptsUnavailable =
+    routeName === ROUTE_NAME.scripts && scriptAvailability.value === 'unavailable'
+  if ((requiredCap && !can(requiredCap)) || modulesUnavailable || scriptsUnavailable) {
     router.push({ name: ROUTE_NAME.proxies })
   }
 })

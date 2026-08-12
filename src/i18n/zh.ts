@@ -9,6 +9,7 @@ const zh: LANG_MESSAGE = {
   connections: '连接',
   logs: '日志',
   modules: '模块',
+  scripts: '脚本',
   tools: '工具',
   tailscale: 'Tailscale',
   terminal: '终端',
@@ -20,6 +21,14 @@ const zh: LANG_MESSAGE = {
   moduleNeverUpdated: '从未更新',
   enableModule: '启用模块 {name}',
   disableModule: '禁用模块 {name}',
+
+  // 脚本页
+  scriptPath: '本地路径',
+  scriptURL: '来源 URL',
+  scriptUpdateInterval: '更新间隔',
+  scriptNeverUpdated: '从未更新',
+  enableScript: '启用脚本 {name}',
+  disableScript: '禁用脚本 {name}',
 
   // 后端类型
   default: '默认',

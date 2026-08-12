@@ -7,6 +7,7 @@ const en = {
   connections: 'Connections',
   logs: 'Logs',
   modules: 'Modules',
+  scripts: 'Scripts',
   tools: 'Tools',
   tailscale: 'Tailscale',
   terminal: 'Terminal',
@@ -18,6 +19,14 @@ const en = {
   moduleNeverUpdated: 'Never updated',
   enableModule: 'Enable module {name}',
   disableModule: 'Disable module {name}',
+
+  // Scripts page
+  scriptPath: 'Local path',
+  scriptURL: 'Source URL',
+  scriptUpdateInterval: 'Update interval',
+  scriptNeverUpdated: 'Never updated',
+  enableScript: 'Enable script {name}',
+  disableScript: 'Disable script {name}',
 
   // Backend type
   default: 'Default',

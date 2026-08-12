@@ -9,6 +9,7 @@ const zhTW: LANG_MESSAGE = {
   connections: '連接',
   logs: '日誌',
   modules: '模組',
+  scripts: '腳本',
   tools: '工具',
   tailscale: 'Tailscale',
   terminal: '終端',
@@ -20,6 +21,14 @@ const zhTW: LANG_MESSAGE = {
   moduleNeverUpdated: '尚未更新',
   enableModule: '啟用模組 {name}',
   disableModule: '停用模組 {name}',
+
+  // 腳本頁
+  scriptPath: '本機路徑',
+  scriptURL: '來源 URL',
+  scriptUpdateInterval: '更新間隔',
+  scriptNeverUpdated: '尚未更新',
+  enableScript: '啟用腳本 {name}',
+  disableScript: '停用腳本 {name}',
 
   // 後端類型
   default: '預設',

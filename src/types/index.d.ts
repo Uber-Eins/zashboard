@@ -122,6 +122,19 @@ export type Module = ModuleInfo & {
   name: string
 }
 
+export type ScriptInfo = {
+  enable: boolean
+  type: string
+  path: string
+  url?: string
+  interval: number
+  updatedAt?: string
+}
+
+export type Script = ScriptInfo & {
+  name: string
+}
+
 export type ClashConnectionRawMessage = {
   id: string
   download: number
