@@ -16,6 +16,7 @@ import type {
   Config,
   DNSQuery,
   ModuleInfo,
+  ModulesResponse,
   NodeRank,
   Proxy,
   ProxyProvider,
@@ -287,13 +288,17 @@ export const probeClashChannel = async (backend: Backend, timeout: number) => {
 // fork mihomo 的配置模块管理端点。先用 probeModulesAPI 静默接受 404，
 // 由 assembly/modules.ts 依据真实响应决定是否向用户显示入口。
 export const fetchModulesAPI = () => {
-  return axios.get<{ modules: Record<string, ModuleInfo> }>('/modules')
+  return axios.get<ModulesResponse>('/modules')
 }
 
 export const probeModulesAPI = () => {
-  return axios.get<{ modules: Record<string, ModuleInfo> }>('/modules', {
+  return axios.get<ModulesResponse>('/modules', {
     validateStatus: (status) => (status >= 200 && status < 300) || status === 404,
   })
+}
+
+export const patchModuleOrderAPI = (order: string[]) => {
+  return axios.patch('/modules', { order })
 }
 
 export const fetchModuleAPI = (name: string) => {

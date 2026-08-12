@@ -21,6 +21,9 @@ const zh: LANG_MESSAGE = {
   moduleNeverUpdated: '从未更新',
   enableModule: '启用模块 {name}',
   disableModule: '禁用模块 {name}',
+  reorderModule: '调整模块 {name} 的执行顺序',
+  clearModuleFilterToReorder: '清除搜索条件后才能调整模块顺序',
+  savingModuleOrder: '正在保存模块顺序',
 
   // 脚本页
   scriptPath: '本地路径',

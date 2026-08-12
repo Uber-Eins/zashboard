@@ -122,6 +122,11 @@ export type Module = ModuleInfo & {
   name: string
 }
 
+export type ModulesResponse = {
+  modules: Record<string, ModuleInfo>
+  order: string[]
+}
+
 export type ScriptInfo = {
   enable: boolean
   type: string

@@ -1,6 +1,8 @@
 <template>
   <article class="scroller-item px-4 py-3">
     <div class="flex items-start gap-3">
+      <slot name="drag-handle" />
+
       <div class="min-w-0 flex-1">
         <div class="flex min-w-0 flex-wrap items-center gap-2">
           <span class="truncate text-sm font-medium">{{ item.name }}</span>
@@ -42,7 +44,10 @@
         </dl>
       </div>
 
-      <label class="flex shrink-0 cursor-pointer items-center gap-2 pt-0.5">
+      <label
+        class="flex shrink-0 items-center gap-2 pt-0.5"
+        :class="disabled ? 'cursor-not-allowed' : 'cursor-pointer'"
+      >
         <span
           class="hidden text-xs sm:inline"
           :class="targetEnabled ? 'text-success' : 'text-base-content/45'"
@@ -55,7 +60,7 @@
             type="checkbox"
             class="toggle toggle-sm"
             :aria-label="$t(targetEnabled ? 'disableModule' : 'enableModule', { name: item.name })"
-            :disabled="isUpdating"
+            :disabled="isUpdating || disabled"
             @change="toggleModule"
           />
           <span
@@ -76,9 +81,15 @@ import type { Module } from '@/types'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-const props = defineProps<{
-  item: Module
-}>()
+const props = withDefaults(
+  defineProps<{
+    disabled?: boolean
+    item: Module
+  }>(),
+  {
+    disabled: false,
+  },
+)
 
 const { t } = useI18n()
 const isUpdating = ref(false)

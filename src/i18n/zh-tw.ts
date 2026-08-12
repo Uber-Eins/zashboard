@@ -21,6 +21,9 @@ const zhTW: LANG_MESSAGE = {
   moduleNeverUpdated: '尚未更新',
   enableModule: '啟用模組 {name}',
   disableModule: '停用模組 {name}',
+  reorderModule: '調整模組 {name} 的執行順序',
+  clearModuleFilterToReorder: '清除搜尋條件後才能調整模組順序',
+  savingModuleOrder: '正在儲存模組順序',
 
   // 腳本頁
   scriptPath: '本機路徑',

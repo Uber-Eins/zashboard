@@ -19,6 +19,9 @@ const en = {
   moduleNeverUpdated: 'Never updated',
   enableModule: 'Enable module {name}',
   disableModule: 'Disable module {name}',
+  reorderModule: 'Reorder module {name}',
+  clearModuleFilterToReorder: 'Clear the search to reorder modules',
+  savingModuleOrder: 'Saving module order',
 
   // Scripts page
   scriptPath: 'Local path',

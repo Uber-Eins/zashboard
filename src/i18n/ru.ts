@@ -21,6 +21,9 @@ const ru: LANG_MESSAGE = {
   moduleNeverUpdated: 'Никогда не обновлялся',
   enableModule: 'Включить модуль {name}',
   disableModule: 'Отключить модуль {name}',
+  reorderModule: 'Изменить порядок модуля {name}',
+  clearModuleFilterToReorder: 'Очистите поиск, чтобы изменить порядок модулей',
+  savingModuleOrder: 'Сохранение порядка модулей',
 
   // Scripts page
   scriptPath: 'Локальный путь',
