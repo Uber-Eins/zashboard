@@ -23,6 +23,8 @@ import type {
   Rule,
   RuleProvider,
   ScriptInfo,
+  ScriptNotificationEvent,
+  ScriptNotificationSnapshot,
 } from '@/types'
 import axios from 'axios'
 import { debounce } from 'lodash'
@@ -332,7 +334,7 @@ export const fetchModuleConfigAPI = () => {
   return axios.get<string>('/configs/modules', { responseType: 'text' })
 }
 
-const fetchMitmJSONAPI = async <T>(path: string): Promise<T | null> => {
+const fetchMihomoJSONAPI = async <T>(path: string): Promise<T | null> => {
   const backend = activeBackend.value
   if (!backend) return null
 
@@ -351,12 +353,12 @@ const fetchMitmJSONAPI = async <T>(path: string): Promise<T | null> => {
 
 // MITM 会话快照用于先探测端点是否存在，避免旧版内核上的 WebSocket 无限重连。
 export const fetchMitmSnapshotAPI = async (): Promise<MitmSnapshot | null> => {
-  const snapshot = await fetchMitmJSONAPI<MitmSnapshot>('mitm')
+  const snapshot = await fetchMihomoJSONAPI<MitmSnapshot>('mitm')
   return Array.isArray(snapshot?.sessions) ? snapshot : null
 }
 
 export const getMitmCaptureStateAPI = async (): Promise<boolean | null> => {
-  const state = await fetchMitmJSONAPI<{ capture: unknown }>('mitm/capture')
+  const state = await fetchMihomoJSONAPI<{ capture: unknown }>('mitm/capture')
   return typeof state?.capture === 'boolean' ? state.capture : null
 }
 
@@ -364,6 +366,18 @@ export const setMitmCaptureStateAPI = (capture: boolean) => axios.put('/mitm/cap
 
 // 增量事件不能像连接全量快照那样 debounce，否则相邻的 session/remove 会丢失。
 export const subscribeMitmAPI = () => createClashWebSocket<MitmEvent>('mitm', undefined, 0)
+
+// Surge-compatible script notifications are forwarded by the core instead of
+// being rendered there. Probe the REST snapshot before opening the reconnecting
+// stream so older cores do not enter a permanent WebSocket reconnect loop.
+export const fetchScriptNotificationSnapshotAPI =
+  async (): Promise<ScriptNotificationSnapshot | null> => {
+    const snapshot = await fetchMihomoJSONAPI<ScriptNotificationSnapshot>('notification')
+    return Array.isArray(snapshot?.notifications) ? snapshot : null
+  }
+
+export const subscribeScriptNotificationsAPI = () =>
+  createClashWebSocket<ScriptNotificationEvent>('notification', undefined, 0)
 
 // smart 内核的节点权重。是否暴露由数据决定(proxy.type === 'smart'),不走能力表。
 export const fetchSmartWeightsAPI = () => {

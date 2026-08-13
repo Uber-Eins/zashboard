@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, type Ref, watch } from 'vue'
 import { RouterView } from 'vue-router'
+import { startScriptNotificationForwarding } from './assembly/notifications'
 import ConfirmDialogHost from './components/common/ConfirmDialogHost.vue'
 import { useKeyboard } from './composables/keyboard'
 import { EMOJIS, FONTS } from './constant'
@@ -174,6 +175,7 @@ autoSwitchToURLBackendIfExists()
 
 onMounted(async () => {
   setThemeColor()
+  startScriptNotificationForwarding()
 
   if (autoImportSettings.value) {
     await importSettingsFromUrl()

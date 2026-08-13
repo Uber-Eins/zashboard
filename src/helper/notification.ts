@@ -1,4 +1,5 @@
 import { i18n } from '@/i18n'
+import type { ScriptNotification } from '@/types'
 import { type Ref } from 'vue'
 
 const t = i18n.global.t
@@ -93,12 +94,13 @@ const setAlert = (
   params: Record<string, string>,
   type: string,
   alertKey: string,
+  translate: boolean,
 ): HTMLElement | null => {
   alert.className = `alert flex p-2 pr-5 relative ${type}`
 
   const contentDiv = document.createElement('div')
   contentDiv.className = 'break-all whitespace-pre-wrap'
-  contentDiv.innerHTML = t(content, params)
+  contentDiv.textContent = translate ? t(content, params) : content
 
   const closeButton = document.createElement('button')
   closeButton.className = 'absolute top-0 right-0 btn btn-xs btn-circle btn-ghost'
@@ -136,12 +138,14 @@ export const showNotification = ({
   key,
   type = 'alert-warning',
   timeout = 3000,
+  translate = true,
 }: {
   content: string
   params?: Record<string, string>
   key?: string
   type?: 'alert-warning' | 'alert-success' | 'alert-error' | 'alert-info' | ''
   timeout?: number
+  translate?: boolean
 }) => {
   const alertKey = key || content
 
@@ -149,14 +153,65 @@ export const showNotification = ({
     const { alert, timer } = alertMap.get(alertKey)!
     clearTimeout(timer)
 
-    const progressBar = setAlert(alert, content, params, type, alertKey)
+    const progressBar = setAlert(alert, content, params, type, alertKey, translate)
     setTimer(alert, timeout, alertKey, progressBar)
     return
   }
 
   const alert = document.createElement('div')
 
-  const progressBar = setAlert(alert, content, params, type, alertKey)
+  const progressBar = setAlert(alert, content, params, type, alertKey, translate)
   toastRef?.value?.insertBefore(alert, toastRef?.value?.firstChild)
   setTimer(alert, timeout, alertKey, progressBar)
+}
+
+const safeWebURL = (value?: string) => {
+  if (!value) return undefined
+  try {
+    const url = new URL(value, window.location.href)
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : undefined
+  } catch {
+    return undefined
+  }
+}
+
+export const showScriptNotification = (message: ScriptNotification) => {
+  const title = message.title || message.script || 'mihomo'
+  const body = [message.subtitle, message.body].filter(Boolean).join('\n')
+  const openURL = safeWebURL(message.options?.url)
+  const mediaURL = safeWebURL(message.options?.['media-url'])
+
+  if (
+    document.visibilityState === 'hidden' &&
+    'Notification' in window &&
+    window.Notification.permission === 'granted'
+  ) {
+    try {
+      const notification = new window.Notification(title, {
+        body,
+        icon: mediaURL,
+        tag: `mihomo-script-${message.id}`,
+        requireInteraction: message.options?.['auto-dismiss'] === false,
+        silent: message.options?.sound === false,
+      })
+      if (openURL && message.options?.action === 'open-url') {
+        notification.onclick = () => {
+          window.focus()
+          window.open(openURL, '_blank', 'noopener,noreferrer')
+          notification.close()
+        }
+      }
+      return
+    } catch {
+      // Fall through to the dashboard toast when the browser rejects a system notification.
+    }
+  }
+
+  showNotification({
+    content: [title, body].filter(Boolean).join('\n'),
+    key: `mihomo-script-${message.id}`,
+    type: 'alert-info',
+    timeout: message.options?.['auto-dismiss'] === false ? 0 : 10000,
+    translate: false,
+  })
 }

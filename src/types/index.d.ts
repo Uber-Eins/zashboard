@@ -140,6 +140,37 @@ export type Script = ScriptInfo & {
   name: string
 }
 
+export type ScriptNotificationOptions = {
+  action?: string
+  url?: string
+  text?: string
+  'media-url'?: string
+  'media-base64'?: string
+  'media-base64-mime'?: string
+  'auto-dismiss'?: boolean
+  sound?: boolean | string
+}
+
+export type ScriptNotification = {
+  id: number
+  time: string
+  title: string
+  subtitle?: string
+  body?: string
+  options?: ScriptNotificationOptions
+  script?: string
+}
+
+export type ScriptNotificationSnapshot = {
+  limit: number
+  notifications: ScriptNotification[]
+}
+
+export type ScriptNotificationEvent =
+  | ({ type: 'snapshot' } & ScriptNotificationSnapshot)
+  | { type: 'notification'; notification: ScriptNotification }
+  | { type: 'heartbeat' }
+
 export type ClashConnectionRawMessage = {
   id: string
   download: number
